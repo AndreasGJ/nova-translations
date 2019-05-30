@@ -1,12 +1,12 @@
 <?php
 
-namespace Aje\NovaTranslations\Http\Controllers;
+namespace Agj\NovaTranslations\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Translation\FileLoader;
-use Aje\NovaTranslations\Services\TranslationLoader;
+use Agj\NovaTranslations\Services\TranslationLoader;
 use Illuminate\Support\Facades\File;
-use Aje\NovaTranslations\Models\Translation;
+use Agj\NovaTranslations\Models\Translation;
 
 class TranslatorController extends Controller
 {

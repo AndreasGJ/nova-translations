@@ -1,9 +1,9 @@
 <?php
 
-namespace Aje\NovaTranslations\Services;
+namespace Agj\NovaTranslations\Services;
 
 use Illuminate\Translation\FileLoader;
-use Aje\NovaTranslations\Models\Translation;
+use Agj\NovaTranslations\Models\Translation;
 use Cache;
 
 class TranslationLoader extends FileLoader

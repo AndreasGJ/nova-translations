@@ -1,9 +1,9 @@
 <?php
 
-namespace Aje\NovaTranslations\Http\Middleware;
+namespace Agj\NovaTranslations\Http\Middleware;
 
 use Laravel\Nova\Nova;
-use Aje\NovaTranslations\NovaTranslations;
+use Agj\NovaTranslations\NovaTranslations;
 
 class Authorize
 {

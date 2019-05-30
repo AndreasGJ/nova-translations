@@ -1,10 +1,10 @@
 <?php
 
-namespace Aje\NovaTranslations;
+namespace Agj\NovaTranslations;
 
 use Illuminate\Translation\TranslationServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Broadcast;
-use Aje\NovaTranslations\Services\TranslationLoader;
+use Agj\NovaTranslations\Services\TranslationLoader;
 
 class TranslationServiceProvider extends ServiceProvider
 {

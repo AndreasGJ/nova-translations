@@ -1,6 +1,6 @@
 <?php
 
-namespace Aje\NovaTranslations;
+namespace Agj\NovaTranslations;
 
 use Laravel\Nova\Nova;
 use Laravel\Nova\Tool;

@@ -1,5 +1,5 @@
 <?php
-namespace Aje\NovaTranslations\Models;
+namespace Agj\NovaTranslations\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Translatable\HasTranslations;

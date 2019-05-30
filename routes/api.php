@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Aje\NovaTranslations\Http\Controllers\TranslatorController;
+use Agj\NovaTranslations\Http\Controllers\TranslatorController;
 
 /*
 |--------------------------------------------------------------------------

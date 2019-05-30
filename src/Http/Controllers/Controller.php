@@ -1,6 +1,6 @@
 <?php
 
-namespace Aje\NovaTranslations\Http\Controllers;
+namespace Agj\NovaTranslations\Http\Controllers;
 
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
