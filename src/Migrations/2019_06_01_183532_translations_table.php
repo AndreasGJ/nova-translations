@@ -13,6 +13,8 @@ class TranslationsTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('translations');
+        
         Schema::create('translations', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('key');
