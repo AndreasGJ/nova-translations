@@ -12,13 +12,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Aje\\NovaTranslations\\": "src/"
+            "Agj\\NovaTranslations\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Aje\\NovaTranslations\\ToolServiceProvider"
+                "Agj\\NovaTranslations\\ToolServiceProvider"
             ]
         }
     },
