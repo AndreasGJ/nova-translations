@@ -156,4 +156,9 @@ export default {
     height: 40px;
   }
 }
+.translation-list {
+  max-height: calc(100vh - 250px);
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+}
 </style>
