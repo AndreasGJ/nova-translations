@@ -1,2 +1,2 @@
-# nova-translations
+# Nova Translations
 Translation Tool for Nova
