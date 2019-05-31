@@ -33,3 +33,8 @@ And in the `config/app.php` `providers` array:
 ```
     Agj\NovaTranslations\TranslationServiceProvider::class,
 ```
+
+And then execute the following migrate command:
+```
+php artisan migrate
+```
