@@ -7,6 +7,7 @@ use Illuminate\Translation\FileLoader;
 use Agj\NovaTranslations\Services\TranslationLoader;
 use Illuminate\Support\Facades\File;
 use Agj\NovaTranslations\Models\Translation;
+use Cache;
 
 class TranslatorController extends Controller
 {
@@ -87,6 +88,8 @@ class TranslatorController extends Controller
             $trans->forgetTranslation('text', $data['locale']);
         }
         if($trans->save()){
+            Cache::flush();
+            
             return response()->json([
                 'status' => true
             ]);
