@@ -122,7 +122,10 @@ export default {
         value = "";
       }
 
-      this.updateTransItem(trans, { new: value, has_changed: true });
+      this.updateTransItem(trans, {
+        new: value,
+        has_changed: value ? true : false
+      });
     }
   },
   mounted() {

@@ -761,7 +761,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         value = "";
       }
 
-      this.updateTransItem(trans, { new: value, has_changed: true });
+      this.updateTransItem(trans, {
+        new: value,
+        has_changed: value ? true : false
+      });
     }
   },
   mounted: function mounted() {
