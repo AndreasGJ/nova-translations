@@ -117,7 +117,10 @@ export default {
         });
     },
     updateTranslation(trans, evt) {
-      const value = evt.target.value;
+      let value = evt.target.value;
+      if (value === trans.old) {
+        value = "";
+      }
 
       this.updateTransItem(trans, { new: value, has_changed: true });
     }
