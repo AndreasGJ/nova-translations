@@ -40,6 +40,8 @@ import TranslationItem from "./TranslationItem";
 export default {
   components: { TranslationItem },
   data() {
+    console.log('Toool translation item');
+    
     return {
       tree: null,
       locales: [],
