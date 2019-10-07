@@ -65,4 +65,14 @@ class TranslationLoader extends FileLoader
 
         return $tree;
     }
+
+    /**
+     * Load translation from files
+     */
+    public function loadFromTransFile($locale, $group)
+    {
+        $old_texts = parent::load($locale, $group);
+
+        return $old_texts;
+    }
 }

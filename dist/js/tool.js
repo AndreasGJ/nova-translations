@@ -675,6 +675,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
 
 
 
@@ -744,6 +745,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           newValue = trans.new;
 
       this.updateTransItem(trans, { loading: true });
+
       Nova.request().post("/nova-vendor/nova-translations/update", {
         locale: locale,
         key: full_key,
@@ -752,19 +754,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var _ref$data = _ref.data,
             rsp = _ref$data === undefined ? {} : _ref$data;
 
-        _this.updateTransItem(trans, { loading: false });
+        _this.updateTransItem(trans, { loading: false, has_changed: false, new: newValue, old: rsp.original });
+
+        _this.$toasted.show('Translation is saved!', { type: 'success' });
+      }).catch(function (error) {
+        _this.$toasted.show('Something went wrong!', { type: 'error' });
       });
     },
     updateTranslation: function updateTranslation(trans, evt) {
       var value = evt.target.value;
-      if (value === trans.old) {
-        value = "";
-      }
 
       this.updateTransItem(trans, {
         new: value,
-        has_changed: value ? true : false
+        has_changed: true
       });
+    },
+    setTranslation: function setTranslation(trans) {
+      var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      return this.updateTransItem(trans, params);
     }
   },
   mounted: function mounted() {
@@ -878,7 +886,7 @@ exports = module.exports = __webpack_require__(0)(false);
 
 
 // module
-exports.push([module.i, "\n.translation[data-v-6706dbc9] {\n  background: #eeeeee;\n}\n.translation[data-v-6706dbc9]:nth-child(2n) {\n    background: #fefefe;\n}\n.translation__key[data-v-6706dbc9] {\n    width: 35%;\n    padding: 6px 10px;\n    font-size: 13px;\n    font-weight: bold;\n}\n.translation__text[data-v-6706dbc9] {\n    -webkit-box-flex: 1;\n        -ms-flex-positive: 1;\n            flex-grow: 1;\n    padding: 6px;\n}\n.translation__text__value[data-v-6706dbc9] {\n      width: 100%;\n      border-radius: 0px;\n      padding: 6px 10px;\n      border: 1px solid #cccccc;\n      outline: none;\n}\n.translation__text__helper[data-v-6706dbc9] {\n      padding: 6px 0 6px;\n}\n.translation__actions[data-v-6706dbc9] {\n    width: 100px;\n    padding: 6px 10px;\n}\n", ""]);
+exports.push([module.i, "\n.translation[data-v-6706dbc9] {\n  background: #eeeeee;\n}\n.translation[data-v-6706dbc9]:nth-child(2n) {\n    background: #fefefe;\n}\n.translation__key[data-v-6706dbc9] {\n    width: 35%;\n    padding: 6px 10px;\n    font-size: 13px;\n    font-weight: bold;\n}\n.translation__text[data-v-6706dbc9] {\n    -webkit-box-flex: 1;\n        -ms-flex-positive: 1;\n            flex-grow: 1;\n    padding: 6px;\n}\n.translation__text__value[data-v-6706dbc9] {\n      width: 100%;\n      border-radius: 0px;\n      padding: 6px 10px;\n      border: 1px solid #cccccc;\n      outline: none;\n}\n.translation__text__helper[data-v-6706dbc9] {\n      padding: 6px 0 6px;\n}\n.translation__actions[data-v-6706dbc9] {\n    width: 100px;\n    padding: 6px 10px;\n}\n.text-right[data-v-6706dbc9] {\n  text-align: right;\n}\n", ""]);
 
 // exports
 
@@ -889,6 +897,11 @@ exports.push([module.i, "\n.translation[data-v-6706dbc9] {\n  background: #eeeee
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
 //
 //
 //
@@ -945,11 +958,32 @@ var render = function() {
         }
       }),
       _vm._v(" "),
-      _vm.trans.new
-        ? _c("p", { staticClass: "translation__text__helper" }, [
-            _c("b", [_vm._v("Old text:")]),
+      _vm.trans.new && _vm.trans.new !== _vm.trans.old
+        ? _c("div", { staticClass: "translation__text__helper" }, [
+            _c("p", [
+              _c("b", [_vm._v("Old text:")]),
+              _vm._v(" "),
+              _c("i", [_vm._v(_vm._s(_vm.trans.old))])
+            ]),
             _vm._v(" "),
-            _c("i", [_vm._v(_vm._s(_vm.trans.old))])
+            _c("p", { staticClass: "text-right" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-default btn-outline btn-sm",
+                  attrs: { type: "button" },
+                  on: {
+                    click: function($event) {
+                      return _vm.$emit("setTranslation", _vm.trans, {
+                        new: "",
+                        has_changed: true
+                      })
+                    }
+                  }
+                },
+                [_vm._v("Roll back")]
+              )
+            ])
           ])
         : _vm._e()
     ]),
@@ -958,7 +992,7 @@ var render = function() {
       _c(
         "button",
         {
-          staticClass: "btn btn-default",
+          staticClass: "btn btn-default btn-primary btn-sm",
           attrs: { disabled: !_vm.trans.has_changed || _vm.trans.loading },
           on: {
             click: function($event) {
@@ -1076,6 +1110,7 @@ var render = function() {
                     attrs: { trans: trans },
                     on: {
                       updateTranslation: _vm.updateTranslation,
+                      setTranslation: _vm.setTranslation,
                       saveTranslation: _vm.saveTranslation
                     }
                   })

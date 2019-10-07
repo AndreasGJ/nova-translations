@@ -9,14 +9,19 @@
         :disabled="trans.loading"
         class="translation__text__value"
       ></textarea>
-      <p class="translation__text__helper" v-if="trans.new">
-        <b>Old text:</b>
-        <i>{{ trans.old }}</i>
-      </p>
+      <div class="translation__text__helper" v-if="trans.new && trans.new !== trans.old">
+        <p>
+          <b>Old text:</b>
+          <i>{{ trans.old }}</i>
+        </p>
+        <p class="text-right">
+          <button type="button" class="btn btn-default btn-outline btn-sm" @click="$emit('setTranslation', trans, {new: '', has_changed: true})">Roll back</button>
+        </p>
+      </div>
     </div>
     <div class="translation__actions">
       <button
-        class="btn btn-default"
+        class="btn btn-default btn-primary btn-sm"
         @click="$emit('saveTranslation', trans)"
         :disabled="!trans.has_changed || trans.loading"
       >Gem</button>
@@ -63,5 +68,11 @@ export default {
     width: 100px;
     padding: 6px 10px;
   }
+}
+.text-right {
+  text-align: right;
+}
+.translation__text__helper .btn {
+
 }
 </style>

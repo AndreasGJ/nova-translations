@@ -26,6 +26,7 @@
           :key="index"
           :trans="trans"
           @updateTranslation="updateTranslation"
+          @setTranslation="setTranslation"
           @saveTranslation="saveTranslation"
         ></TranslationItem>
       </div>
@@ -106,6 +107,7 @@ export default {
     saveTranslation(trans) {
       const { locale, group, key, full_key, new: newValue } = trans;
       this.updateTransItem(trans, { loading: true });
+
       Nova.request()
         .post("/nova-vendor/nova-translations/update", {
           locale,
@@ -113,19 +115,23 @@ export default {
           text: newValue
         })
         .then(({ data: rsp = {} }) => {
-          this.updateTransItem(trans, { loading: false });
+          this.updateTransItem(trans, { loading: false, has_changed: false, new: newValue, old: rsp.original });
+
+          this.$toasted.show('Translation is saved!', { type: 'success' })
+        }).catch(error => {
+          this.$toasted.show('Something went wrong!', { type: 'error' })
         });
     },
     updateTranslation(trans, evt) {
       let value = evt.target.value;
-      if (value === trans.old) {
-        value = "";
-      }
 
       this.updateTransItem(trans, {
         new: value,
-        has_changed: value ? true : false
+        has_changed: true
       });
+    },
+    setTranslation(trans, params = {}){
+      return this.updateTransItem(trans, params);
     }
   },
   mounted() {

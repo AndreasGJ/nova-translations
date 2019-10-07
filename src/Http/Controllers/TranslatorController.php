@@ -77,6 +77,7 @@ class TranslatorController extends Controller
         ]);
 
         $trans = Translation::where('key', $data['key'])->first();
+        $key_splitted = explode('.', $data['key']);
 
         if (!$trans) {
             $trans = new Translation;
@@ -88,14 +89,26 @@ class TranslatorController extends Controller
             $trans->forgetTranslation('text', $data['locale']);
         }
         if($trans->save()){
+            $loader = app('translation.loader');
             Cache::flush();
+
+            // Get original value.
+            $original = '';
+            if(count($key_splitted) > 1){
+                $texts = $loader->loadFromTransFile('da', $key_splitted[0]);
+
+                $original = $texts[$key_splitted[1]];
+            }
             
             return response()->json([
-                'status' => true
+                'status' => true,
+                'original' => $original,
+                'data' => $data,
             ]);
         }
+        
         return response()->json([
-            'error' => 'Wtf'
+            'error' => 'Something went wrong!'
         ]);
     }
 }
