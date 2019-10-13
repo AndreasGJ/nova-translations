@@ -634,12 +634,14 @@ module.exports = function listToStyles (parentId, list) {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TranslationItem__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__TranslationItem___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__TranslationItem__);
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 //
 //
 //
@@ -678,11 +680,40 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 
 
+
+var walkThroughTree = function walkThroughTree() {
+  var tree = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var group = arguments[1];
+  var reg = arguments[2];
+  var selected_locale = arguments[3];
+
+  var list = [];
+  for (var key in tree) {
+    var x = tree[key];
+    var newValue = x.new,
+        old = x.old;
+
+    var full_key = group + "." + key;
+    var value = newValue ? newValue : old;
+
+    if (typeof value === "string" && (!reg || reg && (newValue && newValue.match(reg) || old.match(reg)))) {
+      list.push(_extends({}, x, {
+        key: key,
+        group: group,
+        locale: selected_locale,
+        full_key: full_key
+      }));
+    } else if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === 'object') {
+      var items = walkThroughTree(value, full_key, reg, selected_locale);
+      console.log('walkThroughTree', items, value, full_key);
+    }
+  }
+  return list;
+};
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: { TranslationItem: __WEBPACK_IMPORTED_MODULE_0__TranslationItem___default.a },
   data: function data() {
-    console.log('Toool translation item');
 
     return {
       tree: null,
@@ -704,22 +735,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var list = [];
         for (var group in locale_tree) {
           var tree = locale_tree[group];
-          for (var key in tree) {
-            var x = tree[key];
-            var newValue = x.new,
-                old = x.old;
 
-            var full_key = group + "." + key;
-            var value = newValue ? newValue : old;
-            if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === "object" || reg && !value.match(reg) && !full_key.match(reg)) {
-              continue;
-            }
-            list.push(_extends({}, x, {
-              key: key,
-              group: group,
-              locale: selected_locale,
-              full_key: full_key
-            }));
+          var items = walkThroughTree(tree, group, reg, selected_locale);
+          if (items && items.length > 0) {
+            list.push.apply(list, _toConsumableArray(items));
           }
         }
 

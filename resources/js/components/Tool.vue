@@ -37,10 +37,36 @@
 <script>
 import TranslationItem from "./TranslationItem";
 
+const walkThroughTree = (tree = {}, group, reg, selected_locale) => {
+  const list = [];
+  for (let key in tree) {
+    const x = tree[key];
+    const { new: newValue, old } = x;
+    const full_key = `${group}.${key}`;
+    const value = newValue ? newValue : old;
+
+    if (
+      typeof value === "string" &&
+      (!reg || (reg && ((newValue && newValue.match(reg)) || old.match(reg))))
+    ) {
+      list.push({
+        ...x,
+        key,
+        group,
+        locale: selected_locale,
+        full_key
+      });
+    } else if(typeof value === 'object') {
+      const items = walkThroughTree(value, full_key, reg, selected_locale);
+      console.log('walkThroughTree', items, value, full_key);
+    }
+  }
+  return list;
+}
+
 export default {
   components: { TranslationItem },
   data() {
-    console.log('Toool translation item');
     
     return {
       tree: null,
@@ -63,24 +89,10 @@ export default {
         const list = [];
         for (let group in locale_tree) {
           const tree = locale_tree[group];
-          for (let key in tree) {
-            const x = tree[key];
-            const { new: newValue, old } = x;
-            const full_key = `${group}.${key}`;
-            const value = newValue ? newValue : old;
-            if (
-              typeof value === "object" ||
-              (reg && !value.match(reg) && !full_key.match(reg))
-            ) {
-              continue;
-            }
-            list.push({
-              ...x,
-              key,
-              group,
-              locale: selected_locale,
-              full_key
-            });
+
+          const items = walkThroughTree(tree, group, reg, selected_locale);
+          if(items && items.length > 0){
+            list.push(...items);
           }
         }
 

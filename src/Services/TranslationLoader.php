@@ -53,13 +53,27 @@ class TranslationLoader extends FileLoader
         $tree = [];
 
         foreach($old_texts as $k => $v){
-            if(!is_string($v)){
-                continue;
-            }
+            // if(!is_string($v)){
+            //     continue;
+            // }
 
-            $tree[$k] = [
-                'old' => $v,
-                'new' => !empty($texts[$k]) ? $texts[$k] : null
+            $tree = $this->extractTexts($v, $k, $texts, $tree);
+        }
+
+        return $tree;
+    }
+
+
+    private function extractTexts($value, $key, $texts, $tree)
+    {
+        if(is_object($value) || is_array($value)){
+            foreach($value as $k => $v){
+                $tree = $this->extractTexts($v, $key.'.'.$k, $texts, $tree);
+            }
+        } elseif(is_string($value) || is_numeric($value)){
+            $tree[$key] = [
+                'old' => $value,
+                'new' => !empty($texts[$key]) ? $texts[$key] : null
             ];
         }
 
