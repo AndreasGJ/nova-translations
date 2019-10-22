@@ -678,147 +678,164 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
+//
+//
+//
+//
 
 
 
 var walkThroughTree = function walkThroughTree() {
-  var tree = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var group = arguments[1];
-  var reg = arguments[2];
-  var selected_locale = arguments[3];
+    var tree = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var group = arguments[1];
+    var reg = arguments[2];
+    var selected_locale = arguments[3];
 
-  var list = [];
-  for (var key in tree) {
-    var x = tree[key];
-    var newValue = x.new,
-        old = x.old;
+    var list = [];
+    for (var key in tree) {
+        var x = tree[key];
+        var newValue = x.new,
+            old = x.old,
+            lastValue = x.lastValue;
 
-    var full_key = group + "." + key;
-    var value = newValue ? newValue : old;
+        var full_key = group + "." + key;
+        var value = newValue ? newValue : old;
 
-    if (typeof value === "string" && (!reg || reg && (newValue && newValue.match(reg) || old.match(reg)))) {
-      list.push(_extends({}, x, {
-        key: key,
-        group: group,
-        locale: selected_locale,
-        full_key: full_key
-      }));
-    } else if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === 'object') {
-      var items = walkThroughTree(value, full_key, reg, selected_locale);
-      console.log('walkThroughTree', items, value, full_key);
+        if (typeof value === "string" && (!reg || reg && (full_key.match(reg) || newValue && newValue.match(reg) || lastValue && lastValue.match(reg) || old.match(reg)))) {
+            list.push(_extends({}, x, {
+                key: key,
+                group: group,
+                locale: selected_locale,
+                full_key: full_key
+            }));
+        } else if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === "object") {
+            var items = walkThroughTree(value, full_key, reg, selected_locale);
+        }
     }
-  }
-  return list;
+    return list;
 };
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  components: { TranslationItem: __WEBPACK_IMPORTED_MODULE_0__TranslationItem___default.a },
-  data: function data() {
+    components: { TranslationItem: __WEBPACK_IMPORTED_MODULE_0__TranslationItem___default.a },
+    data: function data() {
+        return {
+            tree: null,
+            locales: [],
+            groups: [],
+            selected_locale: null,
+            search_term: ""
+        };
+    },
 
-    return {
-      tree: null,
-      locales: [],
-      groups: [],
-      selected_locale: null,
-      search_term: ""
-    };
-  },
+    computed: {
+        filtered_list: function filtered_list() {
+            var selected_locale = this.selected_locale;
+            if (this.tree && selected_locale) {
+                var search_term = (this.search_term || "").replace(/\./g, "\\.");
+                var locale_tree = this.tree[selected_locale];
+                var reg = search_term ? new RegExp(search_term.toLowerCase(), "gi") : false;
 
-  computed: {
-    filtered_list: function filtered_list() {
-      var selected_locale = this.selected_locale;
-      if (this.tree && selected_locale) {
-        var search_term = this.search_term;
-        var locale_tree = this.tree[selected_locale];
-        var reg = search_term ? new RegExp(search_term.toLowerCase(), "gi") : false;
+                var list = [];
+                for (var group in locale_tree) {
+                    var tree = locale_tree[group];
 
-        var list = [];
-        for (var group in locale_tree) {
-          var tree = locale_tree[group];
+                    var items = walkThroughTree(tree, group, reg, selected_locale);
+                    if (items && items.length > 0) {
+                        list.push.apply(list, _toConsumableArray(items));
+                    }
+                }
 
-          var items = walkThroughTree(tree, group, reg, selected_locale);
-          if (items && items.length > 0) {
-            list.push.apply(list, _toConsumableArray(items));
-          }
+                return list;
+            }
+            return null;
         }
+    },
+    methods: {
+        updateTransItem: function updateTransItem(trans) {
+            var newData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+            var locale = trans.locale,
+                group = trans.group,
+                key = trans.key;
 
-        return list;
-      }
-      return null;
+            this.tree = _extends({}, this.tree, _defineProperty({}, locale, _extends({}, this.tree[locale], _defineProperty({}, group, _extends({}, this.tree[locale][group], _defineProperty({}, key, _extends({}, this.tree[locale][group][key], newData)))))));
+        },
+        saveTranslation: function saveTranslation(trans) {
+            var _this = this;
+
+            var locale = trans.locale,
+                group = trans.group,
+                key = trans.key,
+                full_key = trans.full_key,
+                newValue = trans.new;
+
+            this.updateTransItem(trans, { loading: true });
+
+            Nova.request().post("/nova-vendor/nova-translations/update", {
+                locale: locale,
+                key: full_key,
+                text: newValue
+            }).then(function (_ref) {
+                var _ref$data = _ref.data,
+                    rsp = _ref$data === undefined ? {} : _ref$data;
+
+                _this.updateTransItem(trans, {
+                    loading: false,
+                    has_changed: false,
+                    lastValue: false,
+                    rollback: false,
+                    new: newValue,
+                    old: rsp.original
+                });
+                _this.search_term = full_key;
+
+                _this.$toasted.show("Translation is saved!", {
+                    type: "success"
+                });
+            }).catch(function (error) {
+                _this.$toasted.show("Something went wrong!", {
+                    type: "error"
+                });
+            });
+        },
+        updateTranslation: function updateTranslation(trans, evt) {
+            var value = evt.target.value;
+
+            this.updateTransItem(trans, {
+                new: value,
+                lastValue: !trans.has_changed ? trans.new : trans.lastValue,
+                rollback: false,
+                has_changed: true
+            });
+        },
+        setTranslation: function setTranslation(trans) {
+            var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+            return this.updateTransItem(trans, params);
+        }
+    },
+    mounted: function mounted() {
+        var _this2 = this;
+
+        Nova.request().get("/nova-vendor/nova-translations/list").then(function (_ref2) {
+            var _ref2$data = _ref2.data,
+                rsp = _ref2$data === undefined ? {} : _ref2$data;
+            var _rsp$data = rsp.data;
+            _rsp$data = _rsp$data === undefined ? {} : _rsp$data;
+            var _rsp$data$locales = _rsp$data.locales,
+                locales = _rsp$data$locales === undefined ? [] : _rsp$data$locales,
+                _rsp$data$groups = _rsp$data.groups,
+                groups = _rsp$data$groups === undefined ? [] : _rsp$data$groups,
+                _rsp$data$tree = _rsp$data.tree,
+                tree = _rsp$data$tree === undefined ? {} : _rsp$data$tree;
+
+
+            _this2.tree = tree;
+            _this2.locales = locales;
+            _this2.groups = groups;
+
+            _this2.selected_locale = locales[0];
+        });
     }
-  },
-  methods: {
-    updateTransItem: function updateTransItem(trans) {
-      var newData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var locale = trans.locale,
-          group = trans.group,
-          key = trans.key;
-
-      this.tree = _extends({}, this.tree, _defineProperty({}, locale, _extends({}, this.tree[locale], _defineProperty({}, group, _extends({}, this.tree[locale][group], _defineProperty({}, key, _extends({}, this.tree[locale][group][key], newData)))))));
-    },
-    saveTranslation: function saveTranslation(trans) {
-      var _this = this;
-
-      var locale = trans.locale,
-          group = trans.group,
-          key = trans.key,
-          full_key = trans.full_key,
-          newValue = trans.new;
-
-      this.updateTransItem(trans, { loading: true });
-
-      Nova.request().post("/nova-vendor/nova-translations/update", {
-        locale: locale,
-        key: full_key,
-        text: newValue
-      }).then(function (_ref) {
-        var _ref$data = _ref.data,
-            rsp = _ref$data === undefined ? {} : _ref$data;
-
-        _this.updateTransItem(trans, { loading: false, has_changed: false, new: newValue, old: rsp.original });
-
-        _this.$toasted.show('Translation is saved!', { type: 'success' });
-      }).catch(function (error) {
-        _this.$toasted.show('Something went wrong!', { type: 'error' });
-      });
-    },
-    updateTranslation: function updateTranslation(trans, evt) {
-      var value = evt.target.value;
-
-      this.updateTransItem(trans, {
-        new: value,
-        has_changed: true
-      });
-    },
-    setTranslation: function setTranslation(trans) {
-      var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      return this.updateTransItem(trans, params);
-    }
-  },
-  mounted: function mounted() {
-    var _this2 = this;
-
-    Nova.request().get("/nova-vendor/nova-translations/list").then(function (_ref2) {
-      var _ref2$data = _ref2.data,
-          rsp = _ref2$data === undefined ? {} : _ref2$data;
-      var _rsp$data = rsp.data;
-      _rsp$data = _rsp$data === undefined ? {} : _rsp$data;
-      var _rsp$data$locales = _rsp$data.locales,
-          locales = _rsp$data$locales === undefined ? [] : _rsp$data$locales,
-          _rsp$data$groups = _rsp$data.groups,
-          groups = _rsp$data$groups === undefined ? [] : _rsp$data$groups,
-          _rsp$data$tree = _rsp$data.tree,
-          tree = _rsp$data$tree === undefined ? {} : _rsp$data$tree;
-
-
-      _this2.tree = tree;
-      _this2.locales = locales;
-      _this2.groups = groups;
-
-      _this2.selected_locale = locales[0];
-    });
-  }
 });
 
 /***/ }),
@@ -949,9 +966,28 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ["trans"]
+    props: ["trans"],
+    computed: {
+        translationValue: function translationValue() {
+            var trans = this.trans;
+            if (trans.new) {
+                return trans.new;
+            }
+            if (trans.has_changed && !trans.rollback) {
+                return "";
+            }
+            return trans.old;
+        }
+    }
 });
 
 /***/ }),
@@ -971,7 +1007,7 @@ var render = function() {
       _c("textarea", {
         staticClass: "translation__text__value",
         attrs: { type: "text", disabled: _vm.trans.loading },
-        domProps: { value: _vm.trans.new || _vm.trans.old },
+        domProps: { value: _vm.translationValue },
         on: {
           input: function($event) {
             return _vm.$emit("updateTranslation", _vm.trans, $event)
@@ -979,7 +1015,8 @@ var render = function() {
         }
       }),
       _vm._v(" "),
-      _vm.trans.new && _vm.trans.new !== _vm.trans.old
+      (_vm.trans.new || _vm.trans.has_changed) &&
+      _vm.trans.new !== _vm.trans.old
         ? _c("div", { staticClass: "translation__text__helper" }, [
             _c("p", [
               _c("b", [_vm._v("Old text:")]),
@@ -997,6 +1034,7 @@ var render = function() {
                     click: function($event) {
                       return _vm.$emit("setTranslation", _vm.trans, {
                         new: "",
+                        rollback: true,
                         has_changed: true
                       })
                     }
@@ -1048,7 +1086,7 @@ var render = function() {
     "div",
     [
       _c("heading", { staticClass: "mb-6 flex" }, [
-        _vm._v("\n    Translations\n    "),
+        _vm._v("\n        Translations\n        "),
         _vm.locales.length > 0
           ? _c(
               "select",
